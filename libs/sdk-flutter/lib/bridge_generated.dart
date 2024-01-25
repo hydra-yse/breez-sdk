@@ -145,6 +145,11 @@ abstract class BreezSdkCore {
 
   FlutterRustBridgeTaskConstMeta get kPaymentByHashConstMeta;
 
+  /// See [BreezServices::set_payment_metadata]
+  Future<void> setPaymentMetadata({required String hash, required String metadata, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSetPaymentMetadataConstMeta;
+
   /// See [BreezServices::send_payment]
   Future<SendPaymentResponse> sendPayment({required SendPaymentRequest req, dynamic hint});
 
@@ -2304,6 +2309,24 @@ class BreezSdkCoreImpl implements BreezSdkCore {
   FlutterRustBridgeTaskConstMeta get kPaymentByHashConstMeta => const FlutterRustBridgeTaskConstMeta(
         debugName: "payment_by_hash",
         argNames: ["hash"],
+      );
+
+  Future<void> setPaymentMetadata({required String hash, required String metadata, dynamic hint}) {
+    var arg0 = _platform.api2wire_String(hash);
+    var arg1 = _platform.api2wire_String(metadata);
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_set_payment_metadata(port_, arg0, arg1),
+      parseSuccessData: _wire2api_unit,
+      parseErrorData: _wire2api_FrbAnyhowException,
+      constMeta: kSetPaymentMetadataConstMeta,
+      argValues: [hash, metadata],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kSetPaymentMetadataConstMeta => const FlutterRustBridgeTaskConstMeta(
+        debugName: "set_payment_metadata",
+        argNames: ["hash", "metadata"],
       );
 
   Future<SendPaymentResponse> sendPayment({required SendPaymentRequest req, dynamic hint}) {
@@ -4577,7 +4600,7 @@ class BreezSdkCoreWire implements FlutterRustBridgeWireBase {
       : _lookup = lookup;
 
   void store_dart_post_cobject(
-    DartPostCObjectFnType ptr,
+    int ptr,
   ) {
     return _store_dart_post_cobject(
       ptr,
@@ -4585,9 +4608,8 @@ class BreezSdkCoreWire implements FlutterRustBridgeWireBase {
   }
 
   late final _store_dart_post_cobjectPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(DartPostCObjectFnType)>>('store_dart_post_cobject');
-  late final _store_dart_post_cobject =
-      _store_dart_post_cobjectPtr.asFunction<void Function(DartPostCObjectFnType)>();
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>('store_dart_post_cobject');
+  late final _store_dart_post_cobject = _store_dart_post_cobjectPtr.asFunction<void Function(int)>();
 
   Object get_dart_object(
     int ptr,
@@ -5004,6 +5026,25 @@ class BreezSdkCoreWire implements FlutterRustBridgeWireBase {
   late final _wire_payment_by_hash =
       _wire_payment_by_hashPtr.asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
+  void wire_set_payment_metadata(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> hash,
+    ffi.Pointer<wire_uint_8_list> metadata,
+  ) {
+    return _wire_set_payment_metadata(
+      port_,
+      hash,
+      metadata,
+    );
+  }
+
+  late final _wire_set_payment_metadataPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_set_payment_metadata');
+  late final _wire_set_payment_metadata = _wire_set_payment_metadataPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
+
   void wire_send_payment(
     int port_,
     ffi.Pointer<wire_SendPaymentRequest> req,
@@ -5374,8 +5415,8 @@ class BreezSdkCoreWire implements FlutterRustBridgeWireBase {
   late final _wire_execute_command =
       _wire_execute_commandPtr.asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
-  ffi.Pointer<ffi.Bool> new_box_autoadd_bool_0(
-    bool value,
+  ffi.Pointer<bool> new_box_autoadd_bool_0(
+    ffi.Pointer<bool> value,
   ) {
     return _new_box_autoadd_bool_0(
       value,
@@ -5383,9 +5424,9 @@ class BreezSdkCoreWire implements FlutterRustBridgeWireBase {
   }
 
   late final _new_box_autoadd_bool_0Ptr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Bool> Function(ffi.Bool)>>('new_box_autoadd_bool_0');
+      _lookup<ffi.NativeFunction<ffi.Pointer<bool> Function(ffi.Pointer<bool>)>>('new_box_autoadd_bool_0');
   late final _new_box_autoadd_bool_0 =
-      _new_box_autoadd_bool_0Ptr.asFunction<ffi.Pointer<ffi.Bool> Function(bool)>();
+      _new_box_autoadd_bool_0Ptr.asFunction<ffi.Pointer<bool> Function(ffi.Pointer<bool>)>();
 
   ffi.Pointer<wire_BuyBitcoinRequest> new_box_autoadd_buy_bitcoin_request_0() {
     return _new_box_autoadd_buy_bitcoin_request_0();
@@ -5883,12 +5924,14 @@ final class wire_ListPaymentsRequest extends ffi.Struct {
 
   external ffi.Pointer<ffi.Int64> to_timestamp;
 
-  external ffi.Pointer<ffi.Bool> include_failures;
+  external ffi.Pointer<bool> include_failures;
 
   external ffi.Pointer<ffi.Uint32> offset;
 
   external ffi.Pointer<ffi.Uint32> limit;
 }
+
+typedef bool = ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Int>)>;
 
 final class wire_SendPaymentRequest extends ffi.Struct {
   external ffi.Pointer<wire_uint_8_list> bolt11;
@@ -5947,7 +5990,7 @@ final class wire_ReceivePaymentRequest extends ffi.Struct {
 
   external ffi.Pointer<wire_OpeningFeeParams> opening_fee_params;
 
-  external ffi.Pointer<ffi.Bool> use_description_hash;
+  external ffi.Pointer<bool> use_description_hash;
 
   external ffi.Pointer<ffi.Uint32> expiry;
 
@@ -6100,10 +6143,6 @@ final class wire_OpenChannelFeeRequest extends ffi.Struct {
 final class wire_ReverseSwapFeesRequest extends ffi.Struct {
   external ffi.Pointer<ffi.Uint64> send_amount_sat;
 }
-
-typedef DartPostCObjectFnType
-    = ffi.Pointer<ffi.NativeFunction<ffi.Bool Function(DartPort port_id, ffi.Pointer<ffi.Void> message)>>;
-typedef DartPort = ffi.Int64;
 
 const int SWAP_PAYMENT_FEE_EXPIRY_SECONDS = 172800;
 
